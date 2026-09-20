@@ -1,0 +1,17 @@
+# Node modules
+node_modules/
+
+# Auto-downloaded binaries
+bin/
+
+# Runtime media storage
+downloads/*
+!downloads/.gitkeep
+uploads/*
+!uploads/.gitkeep
+
+# System & logs
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*

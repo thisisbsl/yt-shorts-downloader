@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShortsSound — YouTube Shorts Downloader & Audio Extractor</title>
+  <meta name="description" content="Download YouTube Shorts in high quality MP4 video or extract crystal-clear MP3 audio. Convert video uploads or pasted links instantly.">
+  
+  <!-- Google Fonts: Outfit & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ambient background glow effects -->
+  <div class="glow-orb glow-1"></div>
+  <div class="glow-orb glow-2"></div>
+  <div class="glow-orb glow-3"></div>
+
+  <div class="app-container">
+    <!-- Header / Navbar -->
+    <header class="app-header">
+      <div class="brand-container">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            <path d="M19 9v6"></path>
+            <path d="M22 6v12"></path>
+          </svg>
+          <div class="pulse-dot"></div>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">Shorts<span class="gradient-text">Sound</span></span>
+          <span class="brand-tagline">Studio Media Converter</span>
+        </div>
+      </div>
+
+      <div class="header-status">
+        <div id="engineStatusBadge" class="status-badge" title="Media engines active">
+          <span class="status-indicator online"></span>
+          <span id="engineStatusText" class="status-text">Engine: Ready</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main">
+      <!-- Hero Intro -->
+      <section class="hero-section">
+        <div class="hero-pill">⚡ Fast, Local & Lossless Extraction</div>
+        <h1 class="hero-title">Download YouTube Shorts & <span class="gradient-text">Extract Audio</span></h1>
+        <p class="hero-subtitle">
+          Save Shorts as HD MP4 videos or studio-quality MP3s. Extract sounds from any pasted video URL or upload your own video files.
+        </p>
+      </section>
+
+      <!-- Glass Tab Card -->
+      <div class="glass-card main-card">
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs" role="tablist">
+          <button id="tabBtnUrl" class="tab-btn active" role="tab" aria-selected="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+            <span class="tab-text-full">YouTube Shorts / URL</span>
+            <span class="tab-text-short">Shorts & URL</span>
+          </button>
+          
+          <button id="tabBtnUpload" class="tab-btn" role="tab" aria-selected="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <span class="tab-text-full">Upload Video & Extract Audio</span>
+            <span class="tab-text-short">Upload Video</span>
+          </button>
+        </nav>
+
+        <!-- TAB 1: URL / YouTube Shorts Downloader -->
+        <section id="tabPanelUrl" class="tab-panel active" role="tabpanel">
+          <div class="input-container">
+            <div class="input-wrapper">
+              <div class="input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
+                  <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
+                </svg>
+              </div>
+              <input 
+                type="text" 
+                id="urlInput" 
+                placeholder="Paste YouTube Shorts link (e.g. youtube.com/shorts/... or youtu.be/...)" 
+                autocomplete="off"
+                spellcheck="false"
+              >
+              <button id="pasteBtn" class="action-btn-small" type="button" title="Paste from clipboard">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                </svg>
+                <span>Paste</span>
+              </button>
+              <button id="fetchBtn" class="primary-btn" type="button">
+                <span>Fetch Info</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </button>
+            </div>
+            
+            <div class="url-hints">
+              <span class="hint-label">Supported:</span>
+              <span class="hint-tag">YouTube Shorts</span>
+              <span class="hint-tag">YouTube Videos</span>
+              <span class="hint-tag">TikTok</span>
+              <span class="hint-tag">Instagram Reels</span>
+              <span class="hint-tag">Direct Video Links</span>
+            </div>
+          </div>
+
+          <!-- Video Details Card (Appears after fetch) -->
+          <div id="videoInfoCard" class="video-info-card hidden">
+            <div class="video-preview-wrapper">
+              <img id="infoThumbnail" src="" alt="Thumbnail" class="video-thumb">
+              <div id="infoDurationBadge" class="duration-badge">0:00</div>
+              <div id="infoShortBadge" class="shorts-badge">⚡ Shorts</div>
+            </div>
+
+            <div class="video-meta-wrapper">
+              <h3 id="infoTitle" class="video-title">Video Title</h3>
+              <p id="infoAuthor" class="video-author">Channel Name</p>
+              
+              <div class="format-selection-box">
+                <label class="section-label">Select Download Mode & Format:</label>
+                <div class="format-pills">
+                  <label class="pill-radio active" id="pillAudioOption">
+                    <input type="radio" name="urlDownloadMode" value="audio" checked>
+                    <div class="pill-content">
+                      <div class="pill-icon">🎵</div>
+                      <div class="pill-text">
+                        <strong>Audio MP3</strong>
+                        <span>Extract sound (320kbps)</span>
+                      </div>
+                    </div>
+                  </label>
+
+                  <label class="pill-radio" id="pillVideoOption">
+                    <input type="radio" name="urlDownloadMode" value="video">
+                    <div class="pill-content">
+                      <div class="pill-icon">🎬</div>
+                      <div class="pill-text">
+                        <strong>Video MP4</strong>
+                        <span>Full HD video + audio</span>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+
+                <!-- Extra audio format choices (revealed when Audio is selected) -->
+                <div id="audioFormatOptions" class="sub-options-row">
+                  <div class="sub-option">
+                    <label for="urlAudioFormatSelect">Format:</label>
+                    <select id="urlAudioFormatSelect" class="custom-select">
+                      <option value="mp3" selected>MP3 (Universal)</option>
+                      <option value="wav">WAV (Lossless)</option>
+                      <option value="aac">AAC (Crisp)</option>
+                      <option value="m4a">M4A (Apple)</option>
+                    </select>
+                  </div>
+                  <div class="sub-option">
+                    <label for="urlAudioQualitySelect">Quality:</label>
+                    <select id="urlAudioQualitySelect" class="custom-select">
+                      <option value="320" selected>320 kbps (Studio)</option>
+                      <option value="192">192 kbps (High)</option>
+                      <option value="128">128 kbps (Standard)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button id="startUrlDownloadBtn" class="download-submit-btn" type="button">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  <span id="downloadBtnLabel">Download & Extract MP3</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 2: Upload Video & Extract Audio -->
+        <section id="tabPanelUpload" class="tab-panel" role="tabpanel">
+          <div class="upload-area-container">
+            <!-- Dropzone -->
+            <div id="dropZone" class="drop-zone">
+              <input type="file" id="videoFileInput" accept="video/mp4,video/quicktime,video/webm,video/x-matroska,video/x-msvideo,video/*" class="file-hidden-input">
+              <div class="drop-zone-content">
+                <div class="upload-icon-circle">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                </div>
+                <h3>Drag & Drop your video file here</h3>
+                <p>or click to browse from your computer</p>
+                <div class="supported-formats">
+                  <span>MP4</span><span>MOV</span><span>WEBM</span><span>MKV</span><span>AVI</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Selected File Details (Revealed once a file is chosen) -->
+            <div id="uploadDetailsCard" class="upload-details-card hidden">
+              <div class="file-info-header">
+                <div class="file-icon">🎬</div>
+                <div class="file-meta">
+                  <h4 id="uploadFileName">my_short_video.mp4</h4>
+                  <span id="uploadFileSize">24.5 MB</span>
+                </div>
+                <button id="removeFileBtn" class="icon-btn-danger" type="button" title="Remove file">✕</button>
+              </div>
+
+              <!-- Video In-Browser Preview player -->
+              <div class="video-preview-player-container">
+                <video id="uploadVideoPreview" controls playsinline></video>
+              </div>
+
+              <!-- Audio extraction settings -->
+              <div class="extraction-settings">
+                <div class="setting-group">
+                  <label for="uploadAudioFormat">Output Audio Format:</label>
+                  <select id="uploadAudioFormat" class="custom-select">
+                    <option value="mp3" selected>MP3 (MPEG-3 Audio)</option>
+                    <option value="wav">WAV (Uncompressed PCM)</option>
+                    <option value="aac">AAC (Advanced Audio)</option>
+                    <option value="m4a">M4A (Apple Audio)</option>
+                  </select>
+                </div>
+
+                <div class="setting-group">
+                  <label for="uploadAudioBitrate">Audio Quality (Bitrate):</label>
+                  <select id="uploadAudioBitrate" class="custom-select">
+                    <option value="320k" selected>320 kbps (Studio Quality)</option>
+                    <option value="192k">192 kbps (High Quality)</option>
+                    <option value="128k">128 kbps (Standard Quality)</option>
+                  </select>
+                </div>
+              </div>
+
+              <button id="startUploadExtractBtn" class="download-submit-btn" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2v20"></path>
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+                <span>Extract Sound from Video</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Dynamic Live Progress Tracker (Visible during download/extraction) -->
+        <div id="progressContainer" class="progress-container hidden">
+          <div class="progress-card">
+            <div class="progress-header">
+              <div class="progress-title-row">
+                <div class="spinner"></div>
+                <h4 id="progressStatusText">Processing media stream...</h4>
+              </div>
+              <span id="progressPercent" class="progress-percentage">0%</span>
+            </div>
+
+            <div class="progress-track">
+              <div id="progressBar" class="progress-fill" style="width: 0%"></div>
+            </div>
+
+            <!-- Audio Wave Animation -->
+            <div class="sound-wave-anim">
+              <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+              <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+              <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+              <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            </div>
+            
+            <p id="progressDetailText" class="progress-detail">Initializing engine and downloading packets...</p>
+          </div>
+        </div>
+
+        <!-- Result / Player & Download Card (Visible after completion) -->
+        <div id="resultContainer" class="result-container hidden">
+          <div class="result-card">
+            <div class="result-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Extraction Ready!</span>
+            </div>
+
+            <h3 id="resultTitle" class="result-title">Title of Downloaded Media</h3>
+            <div class="result-meta">
+              <span id="resultFormatBadge" class="format-badge">MP3</span>
+              <span id="resultSize">3.4 MB</span>
+              <span id="resultDuration">0:45</span>
+            </div>
+
+            <!-- In-browser Media Player -->
+            <div class="player-wrapper">
+              <div id="audioPlayerBox" class="audio-player-box">
+                <audio id="mediaAudioPlayer" controls></audio>
+              </div>
+              <div id="videoPlayerBox" class="video-player-box hidden">
+                <video id="mediaVideoPlayer" controls playsinline></video>
+              </div>
+            </div>
+
+            <!-- Download Buttons -->
+            <div class="result-actions">
+              <a id="directDownloadLink" href="#" download class="primary-download-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Save to Device</span>
+              </a>
+
+              <button id="convertAnotherBtn" class="secondary-action-btn" type="button">
+                <span>Process Another</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Downloads / Conversion History Section -->
+      <section class="history-section">
+        <div class="history-header">
+          <div class="history-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <h2>Session Downloads</h2>
+          </div>
+          <button id="clearHistoryBtn" class="clear-btn" type="button">Clear</button>
+        </div>
+
+        <div id="historyList" class="history-grid">
+          <div class="empty-history" id="emptyHistoryNotice">
+            No downloads yet in this session. Converted audio and videos will appear here for instant access!
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>ShortsSound Studio • High Speed YouTube Shorts & Video Audio Extraction</p>
+      <div class="footer-badges">
+        <span>FFmpeg Powered</span>
+        <span>•</span>
+        <span>Lossless Conversion</span>
+        <span>•</span>
+        <span>Runs Locally</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Toast Notification System -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
