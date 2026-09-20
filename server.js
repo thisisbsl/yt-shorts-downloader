@@ -15,14 +15,16 @@ const ffmpegStatic = require('ffmpeg-static');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Setup directories
-const ROOT_DIR = __dirname;
-const BIN_DIR = path.join(ROOT_DIR, 'bin');
-const UPLOADS_DIR = path.join(ROOT_DIR, 'uploads');
-const DOWNLOADS_DIR = path.join(ROOT_DIR, 'downloads');
-const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
+// Setup directories (uses /tmp in Vercel/serverless environments where root is read-only)
+const isVercel = Boolean(process.env.VERCEL);
+const STORAGE_BASE = isVercel ? '/tmp' : __dirname;
 
-[BIN_DIR, UPLOADS_DIR, DOWNLOADS_DIR, PUBLIC_DIR].forEach(dir => {
+const BIN_DIR = path.join(STORAGE_BASE, 'bin');
+const UPLOADS_DIR = path.join(STORAGE_BASE, 'uploads');
+const DOWNLOADS_DIR = path.join(STORAGE_BASE, 'downloads');
+const PUBLIC_DIR = path.join(__dirname, 'public');
+
+[BIN_DIR, UPLOADS_DIR, DOWNLOADS_DIR].forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -567,11 +569,15 @@ function formatDuration(seconds) {
   return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 }
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`=======================================================`);
-  console.log(` ShortsSound Studio is running at: http://localhost:${PORT}`);
-  console.log(` Static FFmpeg Path: ${ffmpegPath}`);
-  console.log(` yt-dlp Path:        ${ytDlpPath}`);
-  console.log(`=======================================================`);
-});
+// Start Server (only when not handled by Vercel serverless launcher)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`=======================================================`);
+    console.log(` ShortsSound Studio is running at: http://localhost:${PORT}`);
+    console.log(` Static FFmpeg Path: ${ffmpegPath}`);
+    console.log(` yt-dlp Path:        ${ytDlpPath}`);
+    console.log(`=======================================================`);
+  });
+}
+
+module.exports = app;
