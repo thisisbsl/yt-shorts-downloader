@@ -192,6 +192,47 @@ app.get('/api/status', (req, res) => {
 });
 
 /**
+ * Normalizes YouTube Shorts, youtu.be, and video links to clean canonical URLs
+ */
+function normalizeVideoUrl(rawUrl) {
+  if (!rawUrl || typeof rawUrl !== 'string') return rawUrl;
+  let trimmed = rawUrl.trim();
+
+  // Match /shorts/<ID> (e.g. youtube.com/shorts/kJQP7kiw5Fk?si=abc)
+  const shortsMatch = trimmed.match(/\/shorts\/([a-zA-Z0-9_-]{11})/);
+  if (shortsMatch && shortsMatch[1]) {
+    return `https://www.youtube.com/watch?v=${shortsMatch[1]}`;
+  }
+
+  // Match youtu.be/<ID>
+  const youtuMatch = trimmed.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+  if (youtuMatch && youtuMatch[1]) {
+    return `https://www.youtube.com/watch?v=${youtuMatch[1]}`;
+  }
+
+  // Match /watch?v=<ID>
+  const watchMatch = trimmed.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+  if (watchMatch && watchMatch[1]) {
+    return `https://www.youtube.com/watch?v=${watchMatch[1]}`;
+  }
+
+  return trimmed;
+}
+
+/**
+ * Clean human-readable error parser from yt-dlp stderr
+ */
+function parseYtDlpError(stderr, defaultMessage) {
+  if (!stderr) return defaultMessage;
+  const lines = stderr.split('\n').map(l => l.trim());
+  const errorLine = lines.find(l => l.startsWith('ERROR:') || l.includes('unavailable') || l.includes('Private video') || l.includes('Sign in'));
+  if (errorLine) {
+    return errorLine.replace(/^ERROR:\s*(\[.*?\])?\s*/i, '');
+  }
+  return defaultMessage;
+}
+
+/**
  * GET /api/info - Fetch metadata for YouTube Shorts or URL
  */
 app.get('/api/info', async (req, res) => {
@@ -204,22 +245,25 @@ app.get('/api/info', async (req, res) => {
     return res.status(503).json({ error: 'Media engine is still initializing. Please retry in a few moments.' });
   }
 
+  const targetUrl = normalizeVideoUrl(url);
+  console.log(`[Info Fetch] Request for: "${url}" -> Normalized: "${targetUrl}"`);
+
   try {
     const args = [
       '--dump-single-json',
       '--no-warnings',
       '--no-playlist',
-      '--ignore-errors',
       '--skip-download',
-      url
+      '--js-runtimes', 'node',
+      '--extractor-args', 'youtube:player_client=android,web',
+      targetUrl
     ];
 
-    execFile(ytDlpPath, args, { maxBuffer: 10 * 1024 * 1024, timeout: 45000 }, (error, stdout, stderr) => {
+    execFile(ytDlpPath, args, { maxBuffer: 15 * 1024 * 1024, timeout: 45000 }, (error, stdout, stderr) => {
       if (error) {
         console.error('[yt-dlp info error]', stderr || error.message);
-        return res.status(400).json({
-          error: 'Failed to fetch video details. The link may be private, restricted, or invalid.'
-        });
+        const userMsg = parseYtDlpError(stderr, 'Failed to fetch video details. The link may be private, restricted, or invalid.');
+        return res.status(400).json({ error: userMsg });
       }
 
       try {
@@ -262,6 +306,7 @@ app.post('/api/download-url', async (req, res) => {
     return res.status(503).json({ error: 'Media engine is initializing. Please wait a moment.' });
   }
 
+  const targetUrl = normalizeVideoUrl(url);
   const taskId = 'task_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
   const isAudio = mode === 'audio';
   const outExt = isAudio ? audioFormat : 'mp4';
@@ -288,6 +333,8 @@ app.post('/api/download-url', async (req, res) => {
     '--newline',
     '--no-playlist',
     '--ffmpeg-location', ffmpegPath,
+    '--js-runtimes', 'node',
+    '--extractor-args', 'youtube:player_client=android,web',
     '-o', outTemplate
   ];
 
@@ -305,11 +352,12 @@ app.post('/api/download-url', async (req, res) => {
     );
   }
 
-  args.push(url);
+  args.push(targetUrl);
 
   console.log(`[Download URL] Executing: ${ytDlpPath} ${args.join(' ')}`);
 
   const proc = spawn(ytDlpPath, args);
+  let stderrText = '';
 
   proc.stdout.on('data', (data) => {
     const text = data.toString();
@@ -329,7 +377,9 @@ app.post('/api/download-url', async (req, res) => {
   });
 
   proc.stderr.on('data', (data) => {
-    console.warn(`[yt-dlp stderr] ${data.toString()}`);
+    const text = data.toString();
+    stderrText += text;
+    console.warn(`[yt-dlp stderr] ${text}`);
   });
 
   proc.on('close', (code) => {
@@ -362,7 +412,7 @@ app.post('/api/download-url', async (req, res) => {
       }
     } else {
       task.status = 'error';
-      task.error = `Download failed with exit code ${code}. Please ensure the URL is valid.`;
+      task.error = parseYtDlpError(stderrText, `Download failed with exit code ${code}. Please ensure the URL is valid.`);
     }
   });
 
